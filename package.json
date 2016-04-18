@@ -1,5 +1,17 @@
 {
   "name": "react-native-indoor-atlas",
   "version": "0.0.1",
-  "keywords": "react-native"
+  "keywords": "react-native",
+  "main": "index.js",
+  "peerDependencies": {
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "eslint": "^2.7.0",
+    "eslint-plugin-react": "^4.3.0",
+    "eslint-plugin-react-native": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint index.js lib"
+  }
 }

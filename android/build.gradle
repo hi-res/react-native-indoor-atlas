@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false  // Set this to true to enable Proguard
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+  compile 'com.facebook.react:react-native:0.20.1'
+  compile 'com.indooratlas.android:indooratlas-android-sdk:2.1.0@aar'
+}
+repositories{
+	maven {
+    url "http://indooratlas-ltd.bintray.com/mvn-public"
+	}
+}
