@@ -5,7 +5,7 @@
 'use strict'
 
 const NativeModules = require('react-native').NativeModules,
-      IANative = NativeModules.IndoorAtlasReactNativePlugin
+      IANative = NativeModules.ReactNativeIndoorAtlas
 
 //var warning = require('fbjs/lib/warning')
 

@@ -42,12 +42,11 @@ public class IndoorAtlasReactNativePlugin
   extends ReactContextBaseJavaModule
   implements ActivityEventListener
 {
-  public static final String TAG = "IndoorAtlasReactNativePlugin";
+  public static final String TAG = "ReactNativeIndoorAtlas";
   public static final int CODE_PERMISSIONS = 1;
 
   private ReactApplicationContext appContext;
-  private HashMap<Integer, IALocationManager> locationManagerRegistry;
-  private int locationManagerRefCount = 0;
+  private IALocationManager lmInstance;
 
   public IndoorAtlasReactNativePlugin(ReactApplicationContext appContext) {
     super(appContext);
@@ -62,13 +61,17 @@ public class IndoorAtlasReactNativePlugin
     //Activity activity = (Activity)((Context) appContext);
 
     //ActivityCompat.requestPermissions(activity, neededPermissions, CODE_PERMISSIONS);
-    locationManagerRegistry = new HashMap<Integer, IALocationManager>();
     appContext.addActivityEventListener(this);
   }
 
   @Override
   public String getName() {
     return TAG;
+  }
+
+  @Override
+  public boolean canOverrideExistingModule() {
+    return true;
   }
 
   @Override
@@ -96,11 +99,8 @@ public class IndoorAtlasReactNativePlugin
     mainHandler.post(new Runnable() {
       @Override
       public void run() {
-        int index = locationManagerRefCount;
-        IALocationManager lm = IALocationManager.create(appContext);
-        locationManagerRegistry.put(index, lm);
-        promise.resolve(index);
-        locationManagerRefCount += 1;
+        lmInstance = IALocationManager.create(appContext);
+        promise.resolve();
       }
     });
   }

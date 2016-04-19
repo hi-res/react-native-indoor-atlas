@@ -13,5 +13,8 @@
   },
   "scripts": {
     "lint": "eslint index.js lib"
+  },
+  "dependencies": {
+    "eventemitter2": "^1.0.0"
   }
 }
