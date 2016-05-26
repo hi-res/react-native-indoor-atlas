@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -56,11 +57,7 @@ public class IndoorAtlasReactNativePlugin
   public IndoorAtlasReactNativePlugin(final ReactApplicationContext context) {
     super(context);
 
-    String[] neededPermissions = {
-      Manifest.permission.CHANGE_WIFI_STATE,
-      Manifest.permission.ACCESS_WIFI_STATE,
-      Manifest.permission.ACCESS_COARSE_LOCATION
-    };
+    context.addActivityEventListener(this);
 
     final IndoorAtlasReactNativePlugin self = this;
     Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -75,9 +72,6 @@ public class IndoorAtlasReactNativePlugin
 
     mAppContext = context;
     mAppContext.addActivityEventListener(this);
-    //Activity activity = (Activity)((Context) appContext);
-
-    //ActivityCompat.requestPermissions(activity, neededPermissions, CODE_PERMISSIONS);
   }
 
   private void onResume() {
@@ -163,11 +157,15 @@ public class IndoorAtlasReactNativePlugin
   @Override
   public void onEnterRegion(IARegion region) {
     Log.d("RNIA", String.format("onEnterRegion %s", region.toString()));
+    WritableMap params = Arguments.createMap();
+    this.sendEvent("onEnterRegion", params);
   }
 
   @Override
   public void onExitRegion(IARegion region) {
     Log.d("RNIA", String.format("onExitRegion %s", region.toString()));
+    WritableMap params = Arguments.createMap();
+    this.sendEvent("onExitRegion", params);
   }
 
 	private void sendEvent(String eventName, @Nullable WritableMap params) {
@@ -179,10 +177,14 @@ public class IndoorAtlasReactNativePlugin
   //IALocationListener methods
 	public void onLocationChanged(IALocation location) {
 		// handle location change
+    WritableMap params = Arguments.createMap();
+    this.sendEvent("onLocationChanged", params);
 	}
 
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// handle service status change
+    WritableMap params = Arguments.createMap();
+    this.sendEvent("onStatusChanged", params);
 	}
   
   //@ReactMethod
