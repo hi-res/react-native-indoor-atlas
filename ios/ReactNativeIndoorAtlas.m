@@ -9,6 +9,7 @@ RCT_EXPORT_MODULE()
     self = [super init];
     if (self) {
         [[IALocationManager sharedInstance] setDelegate:self];
+        self.resourceManager = [IAResourceManager resourceManagerWithLocationManager:[IALocationManager sharedInstance]];
     }
     return self;
 }
@@ -25,7 +26,19 @@ RCT_REMAP_METHOD(setApiKey,
                  andSecret:(NSString*)apiSecret)
 {
     IALocationManager *lm = [IALocationManager sharedInstance];
+    [lm setDelegate:self];
+    
+    
     [lm setApiKey:apiKey andSecret:apiSecret];
+    
+    [lm startUpdatingLocation];
+    
+//    [lm setDelegate:self];
+    
+    
+    // Set initial location
+//    IALocation *location = [IALocation locationWithFloorPlanId:@"f1ab7feb-ed18-4b66-b948-8d9893ba3270"];
+//    lm.location = location;
 }
 
 RCT_REMAP_METHOD(start,
@@ -33,7 +46,7 @@ RCT_REMAP_METHOD(start,
                  orReject:(RCTPromiseRejectBlock)reject)
 {
     IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm stopUpdatingLocation];
+    [lm startUpdatingLocation];
     resolve(nil);
 }
 
@@ -42,7 +55,7 @@ RCT_REMAP_METHOD(stop,
                  orReject:(RCTPromiseRejectBlock)reject)
 {
     IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm startUpdatingLocation];
+    [lm stopUpdatingLocation];
     resolve(nil);
 }
 
@@ -71,6 +84,13 @@ RCT_REMAP_METHOD(getLocation,
     resolve(retVal);
 }
 
+RCT_REMAP_METHOD(setLocationById,
+                 setLocationById:(NSString*)locationId)
+{
+    IALocation *location = [IALocation locationWithFloorPlanId:locationId];
+    [[IALocationManager sharedInstance] setLocation:location];
+}
+
 RCT_REMAP_METHOD(setLocation,
                  setLocationWithLat:(NSNumber*)lat
                  andLng:(NSNumber*)lng
@@ -86,6 +106,12 @@ RCT_REMAP_METHOD(setLocation,
            didUpdateLocations:(nonnull NSArray*)locations
 {
     NSLog(@"didUpdateLocations: %@", locations);
+    (void) manager;
+    
+    CLLocation *l = [(IALocation*)locations.lastObject location];
+    
+    // The accuracy of coordinate position depends on the placement of floor plan image.
+    NSLog(@"position changed to coordinate: %f,%f", l.coordinate.latitude, l.coordinate.longitude);
 }
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
@@ -109,7 +135,22 @@ RCT_REMAP_METHOD(setLocation,
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
     calibrationQualityChanged:(enum ia_calibration)quality
 {
-    NSLog(@"calibrationQualityChanged: %@", quality);
+    NSString* sQuality;
+    
+    switch (quality) {
+        case kIACalibrationGood:
+            sQuality = @"kIACalibrationGood";
+            break;
+        case kIACalibrationPoor:
+            sQuality = @"kIACalibrationPoor";
+            break;
+        case kIACalibrationExcellent:
+            sQuality = @"kIACalibrationExcellent";
+            break;
+        default:
+            break;
+    }
+    NSLog(@"calibrationQualityChanged: %@", sQuality);
 }
 
 @end

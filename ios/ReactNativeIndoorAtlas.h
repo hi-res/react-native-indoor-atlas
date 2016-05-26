@@ -1,9 +1,10 @@
 #import "RCTBridgeModule.h"
 
 @import IndoorAtlas;
-#import <IndoorAtlas/IndoorAtlas.h>
 
-@interface ReactNativeIndoorAtlas : NSObject <RCTBridgeModule, IALocationManagerDelegate>
+@interface ReactNativeIndoorAtlas : NSObject () <RCTBridgeModule, IALocationManagerDelegate>
+
+@property(nonatomic) IAResourceManager* resourceManager;
 
 - (void)getVersion:(RCTPromiseResolveBlock)resolve
           orReject:(RCTPromiseRejectBlock)reject;
@@ -19,6 +20,8 @@
 
 - (void)getLocation:(RCTPromiseResolveBlock)resolve
            orReject:(RCTPromiseRejectBlock)reject;
+
+- (void)setLocationById:(NSNumber*)locationId;
 
 - (void)setLocationWithLat:(NSNumber*)lat
                     andLng:(NSNumber*)lng
