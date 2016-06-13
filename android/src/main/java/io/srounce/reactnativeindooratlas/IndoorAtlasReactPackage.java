@@ -1,5 +1,7 @@
 package io.srounce.reactnativeindooratlas;
 
+import android.app.Activity;
+
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -13,11 +15,17 @@ import java.util.List;
 public class IndoorAtlasReactPackage implements ReactPackage {
   public static final String TAG = "IndoorAtlasReactPackage";
 
+  private Activity mActivity;
+
+  public IndoorAtlasReactPackage(Activity activity) {
+    this.mActivity = activity;
+  }
+
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
     List<NativeModule> modules = new ArrayList<>();
 
-    modules.add(new IndoorAtlasReactNativePlugin(reactContext));
+    modules.add(new IndoorAtlasReactNativePlugin(reactContext, mActivity));
 
     return modules;
   }

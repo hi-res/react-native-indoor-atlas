@@ -14,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -43,21 +44,30 @@ import javax.annotation.Nullable;
 import android.content.Context;
 
 import com.indooratlas.android.sdk.*;
+import com.indooratlas.android.sdk.resources.*;
 
 public class IndoorAtlasReactNativePlugin 
   extends ReactContextBaseJavaModule
-  implements ActivityEventListener, IALocationListener, IARegion.Listener
+  implements ActivityEventListener, LifecycleEventListener, IALocationListener, IARegion.Listener
 {
-  public static final String TAG = "ReactNativeIndoorAtlas";
+  public static final String TAG = "RNIA";
   public static final int CODE_PERMISSIONS = 1;
 
+  private Activity mActivity;
   private ReactApplicationContext mAppContext;
   private IALocationManager mLocationManager;
+	private IAResourceManager mResourceManager;
 
-  public IndoorAtlasReactNativePlugin(final ReactApplicationContext context) {
+  public IndoorAtlasReactNativePlugin(
+      final ReactApplicationContext context,
+      final Activity activity
+  ) {
     super(context);
 
-    context.addActivityEventListener(this);
+    mActivity = activity;
+    mAppContext = context;
+    mAppContext.addActivityEventListener(this);
+    mAppContext.addLifecycleEventListener(this);
 
     final IndoorAtlasReactNativePlugin self = this;
     Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -65,29 +75,37 @@ public class IndoorAtlasReactNativePlugin
       @Override
       public void run() {
         mLocationManager = IALocationManager.create(context);
-        Boolean result = mLocationManager.requestLocationUpdates(IALocationRequest.create(), self);
-        Log.d("RNIA", String.format("Registered for events: %b", result));
+        mResourceManager = IAResourceManager.create(context);
       }
     });
-
-    mAppContext = context;
-    mAppContext.addActivityEventListener(this);
   }
 
-  private void onResume() {
+  @Override
+  public void onHostResume() {
     final IndoorAtlasReactNativePlugin self = this;
+
+    Log.d(TAG, String.format("onResume"));
+
+    WritableMap params = Arguments.createMap();
+    this.sendEvent("test", params);
 
     Handler mainHandler = new Handler(Looper.getMainLooper());
     mainHandler.post(new Runnable() {
       @Override
       public void run() {
+        Boolean result = mLocationManager.requestLocationUpdates(IALocationRequest.create(), self);
+        Log.d(TAG, String.format("Registered for events: %b", result));
+
         mLocationManager.registerRegionListener(self);
       }
     });
   }
 
-  private void onPause() {
+  @Override
+  public void onHostPause() {
     final IndoorAtlasReactNativePlugin self = this;
+
+    Log.d(TAG, String.format("onPause"));
 
     Handler mainHandler = new Handler(Looper.getMainLooper());
     mainHandler.post(new Runnable() {
@@ -96,6 +114,11 @@ public class IndoorAtlasReactNativePlugin
         mLocationManager.unregisterRegionListener(self);
       }
     });
+  }
+
+  @Override
+  public void onHostDestroy() {
+    mLocationManager.destroy();
   }
 
   @Override
@@ -110,7 +133,7 @@ public class IndoorAtlasReactNativePlugin
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    Log.d("RNIA", String.format("requestCode: %d\n resultCode: %d\n", requestCode, resultCode));
+    Log.d(TAG, String.format("requestCode: %d\n resultCode: %d\n", requestCode, resultCode));
   }
 
   //@Override
@@ -171,7 +194,7 @@ public class IndoorAtlasReactNativePlugin
 	private void sendEvent(String eventName, @Nullable WritableMap params) {
 		mAppContext
       .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-      .emit("IALocationManager." + eventName, params);
+      .emit(String.format("%s.%s", TAG, eventName), params);
 	}
 
   //IALocationListener methods
@@ -184,8 +207,74 @@ public class IndoorAtlasReactNativePlugin
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// handle service status change
     WritableMap params = Arguments.createMap();
-    this.sendEvent("onStatusChanged", params);
+    //this.sendEvent("onStatusChanged", params);
+
+    switch (status) {
+			case IALocationManager.STATUS_CALIBRATION_CHANGED:
+				String quality = "unknown";
+				switch (extras.getInt("quality")) {
+					case IALocationManager.CALIBRATION_POOR:
+						quality = "Poor";
+						break;
+					case IALocationManager.CALIBRATION_GOOD:
+						quality = "Good";
+						break;
+					case IALocationManager.CALIBRATION_EXCELLENT:
+						quality = "Excellent";
+						break;
+				}
+				Log.d(TAG, String.format("Calibration change. Quality: %s", quality));
+        params.putString("quality", quality);
+        this.sendEvent("onCalibrationChanged", params);
+				break;
+			case IALocationManager.STATUS_AVAILABLE:
+				Log.d(TAG, "onStatusChanged: Available");
+        params.putString("status", "STATUS_AVAILABLE");
+        this.sendEvent("onStatusChanged", params);
+				break;
+			case IALocationManager.STATUS_LIMITED:
+				Log.d(TAG, "onStatusChanged: Limited");
+        params.putString("status", "STATUS_LIMITED");
+        this.sendEvent("onStatusChanged", params);
+				break;
+			case IALocationManager.STATUS_OUT_OF_SERVICE:
+				Log.d(TAG, "onStatusChanged: Out of service");
+        params.putString("status", "STATUS_OUT_OF_SERVICE");
+        this.sendEvent("onStatusChanged", params);
+				break;
+			case IALocationManager.STATUS_TEMPORARILY_UNAVAILABLE:
+				Log.d(TAG, "onStatusChanged: Temporarily unavailable");
+        params.putString("status", "STATUS_TEMPORARILY_UNAVAILABLE");
+        this.sendEvent("onStatusChanged", params);
+		}
+
 	}
+
+//private void fetchFloorPlan(String id) {
+//  // Cancel pending operation, if any
+//  if (mPendingAsyncResult != null && !mPendingAsyncResult.isCancelled()) {
+//    mPendingAsyncResult.cancel();
+//  }
+
+//  mPendingAsyncResult = mResourceManager.fetchFloorPlanWithId(id);
+//  if (mPendingAsyncResult != null) {
+//    mPendingAsyncResult.setCallback(new IAResultCallback<IAFloorPlan>() {
+//      @Override
+//      public void onResult(IAResult<IAFloorPlan> result) {
+//        Logger.d(TAG, "onResult: %s", result);
+
+//        if (result.isSuccess()) {
+//          handleFloorPlanChange(result.getResult());
+//        } else {
+//           do something with error
+//          Toast.makeText(FloorPlanManagerActivity.this,
+//            "loading floor plan failed: " + result.getError(), Toast.LENGTH_LONG)
+//            .show();
+//        }
+//      }
+//    }, Looper.getMainLooper());  deliver callbacks in main thread
+//  }
+//}
   
   //@ReactMethod
   //public void createLocationManager(final Promise promise) {

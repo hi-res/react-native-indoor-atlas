@@ -1,3 +1,19 @@
+println """\
+react - RNIA
+"""
+
+//buildscript {
+	//repositories {
+		////mavenCentral()
+    //mavenLocal()
+    //jcenter()
+	//}
+	//dependencies {
+		//classpath 'com.android.tools.build:gradle:1.3.1'
+	//}
+//}
+
+//apply plugin: 'android-library'
 apply plugin: 'com.android.library'
 
 android {
@@ -19,13 +35,45 @@ android {
     }
 }
 
+//println """\
+//Welcome to Gradle $gradle.gradleVersion - http://www.gradle.org
+//Gradle home is set to: $gradle.gradleHomeDir
+//Gradle user directory is set to: $gradle.gradleUserHomeDir
+ 
+//Base directory: $projectDir
+//Root directory: $rootDir
+//Running script ${relativePath(buildFile)}
+//"""
+
+//repositories {
+  //mavenLocal()
+  //maven {
+    //url "http://indooratlas-ltd.bintray.com/mvn-public"
+  //}
+  ////jcenter()
+  ////mavenCentral()
+//}
+
 dependencies {
-  compile 'com.facebook.react:react-native:0.20.1'
+	//compile "com.facebook.react:react-native:+"
+  compile "com.facebook.react:react-native:+"
   compile 'com.indooratlas.android:indooratlas-android-sdk:2.1.0@aar'
 }
 
-repositories{
-	maven {
-    url "http://indooratlas-ltd.bintray.com/mvn-public"
-	}
-}
+//allprojects {
+  //repositories {
+    //mavenLocal()
+    ////jcenter()
+    //maven {
+      //file "$rootDir/../node_modules/react-native/android"
+      //url "$rootDir/../node_modules/react-native/android"
+      
+      ////url "$rootDir/../node_modules/react-native/ReactAndroid"
+      ////url "$projectDir/../../node_modules/react-native/android"
+      ////url "$projectDir/../../react-native/android"
+      ////url "$projectDir/../react-native/android"
+      //url "http://indooratlas-ltd.bintray.com/mvn-public"
+    //}
+  //}
+//}
+
