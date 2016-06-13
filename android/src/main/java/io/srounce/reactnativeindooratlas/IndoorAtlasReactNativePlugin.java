@@ -31,8 +31,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static java.lang.Math.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.Long;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -181,6 +183,7 @@ public class IndoorAtlasReactNativePlugin
   public void onEnterRegion(IARegion region) {
     Log.d("RNIA", String.format("onEnterRegion %s", region.toString()));
     WritableMap params = Arguments.createMap();
+    params.putMap("region", this.serializeRegion(region));
     this.sendEvent("onEnterRegion", params);
   }
 
@@ -188,10 +191,11 @@ public class IndoorAtlasReactNativePlugin
   public void onExitRegion(IARegion region) {
     Log.d("RNIA", String.format("onExitRegion %s", region.toString()));
     WritableMap params = Arguments.createMap();
+    params.putMap("region", this.serializeRegion(region));
     this.sendEvent("onExitRegion", params);
   }
 
-	private void sendEvent(String eventName, @Nullable WritableMap params) {
+	private void sendEvent(String eventName, @Nullable Object params) {
 		mAppContext
       .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
       .emit(String.format("%s.%s", TAG, eventName), params);
@@ -200,7 +204,9 @@ public class IndoorAtlasReactNativePlugin
   //IALocationListener methods
 	public void onLocationChanged(IALocation location) {
 		// handle location change
+    Log.d("RNIA", String.format("onLocationChanged %s", location.toString()));
     WritableMap params = Arguments.createMap();
+    params.putMap("location", this.serializeLocation(location));
     this.sendEvent("onLocationChanged", params);
 	}
 
@@ -249,6 +255,32 @@ public class IndoorAtlasReactNativePlugin
 		}
 
 	}
+
+  private WritableMap serializeLocation(IALocation location) {
+    WritableMap serialized = Arguments.createMap();
+
+    serialized.putDouble("latitude", location.getLatitude());
+    serialized.putDouble("longitude", location.getLongitude());
+    serialized.putDouble("altitude", location.getAltitude());
+    serialized.putDouble("bearing", (double) location.getBearing());
+    serialized.putDouble("accuracy", (double) location.getAccuracy());
+    serialized.putMap("region", this.serializeRegion(location.getRegion()));
+    serialized.putInt("timestamp", new Long(location.getTime()).intValue());
+    serialized.putBoolean("hasFloorLevel", location.hasFloorLevel());
+    serialized.putInt("floorLevel", location.getFloorLevel());
+
+    return serialized;
+  }
+
+  private WritableMap serializeRegion(IARegion region) {
+    WritableMap serialized = Arguments.createMap();
+
+    serialized.putString("id", region.getId());
+    serialized.putInt("timestamp", new Long(region.getTimestamp()).intValue());
+    serialized.putInt("type", region.getType());
+
+    return serialized;
+  }
 
 //private void fetchFloorPlan(String id) {
 //  // Cancel pending operation, if any
