@@ -5,9 +5,10 @@
 'use strict'
 
 const NativeModules = require('react-native').NativeModules,
-      IANative = NativeModules.ReactNativeIndoorAtlas
+      IANative = NativeModules.RNIA
 
 //var warning = require('fbjs/lib/warning')
+
 
 var ReactNativeIndoorAtlas = {
   IALocationManager: require('./lib/IALocationManager.js'),
