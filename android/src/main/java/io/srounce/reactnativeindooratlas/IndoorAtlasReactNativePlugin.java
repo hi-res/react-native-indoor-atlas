@@ -72,8 +72,7 @@ public class IndoorAtlasReactNativePlugin
     mAppContext.addLifecycleEventListener(this);
 
     final IndoorAtlasReactNativePlugin self = this;
-    Handler mainHandler = new Handler(Looper.getMainLooper());
-    mainHandler.post(new Runnable() {
+    (new Handler(Looper.getMainLooper())).post(new Runnable() {
       @Override
       public void run() {
         mLocationManager = IALocationManager.create(context);
@@ -91,8 +90,7 @@ public class IndoorAtlasReactNativePlugin
     WritableMap params = Arguments.createMap();
     this.sendEvent("test", params);
 
-    Handler mainHandler = new Handler(Looper.getMainLooper());
-    mainHandler.post(new Runnable() {
+    (new Handler(Looper.getMainLooper())).post(new Runnable() {
       @Override
       public void run() {
         Boolean result = mLocationManager.requestLocationUpdates(IALocationRequest.create(), self);
@@ -109,8 +107,7 @@ public class IndoorAtlasReactNativePlugin
 
     Log.d(TAG, String.format("onPause"));
 
-    Handler mainHandler = new Handler(Looper.getMainLooper());
-    mainHandler.post(new Runnable() {
+    (new Handler(Looper.getMainLooper())).post(new Runnable() {
       @Override
       public void run() {
         mLocationManager.unregisterRegionListener(self);
@@ -157,8 +154,7 @@ public class IndoorAtlasReactNativePlugin
       final String floorplanId,
       final Promise promise
   ) {
-    Handler mainHandler = new Handler(Looper.getMainLooper());
-    mainHandler.post(new Runnable() {
+    (new Handler(Looper.getMainLooper())).post(new Runnable() {
       @Override
       public void run() {
         try {
@@ -175,21 +171,55 @@ public class IndoorAtlasReactNativePlugin
   }
 
   @ReactMethod
-  public void setApiKey(String apiKey, String apiSecret, final Promise promise) {
-    promise.reject("This method should not be called on Android. Please set the API key/secret in AndroidManifest.xml");
+  public void getFloorplan(String floorplanId, final Promise promise) {
+    fetchFloorPlan(floorplanId, new IAResultCallback<IAFloorPlan>() {
+      @Override
+      public void onResult(IAResult<IAFloorPlan> result) {
+        if (result.isSuccess()) {
+          promise.resolve(serializeFloorplan(result.getResult()));
+        } else {
+          promise.reject("Fetching floorplan failed");
+        }
+      }
+    });
+  }
+
+  @ReactMethod
+  public void setApiKey(
+      String apiKey,
+      String apiSecret,
+      final Promise promise
+  ) {
+    promise.reject("This method should not be called on Android. Please set " +
+        "the API key/secret in AndroidManifest.xml");
   }
 
   @Override
-  public void onEnterRegion(IARegion region) {
-    Log.d("RNIA", String.format("onEnterRegion %s", region.toString()));
-    WritableMap params = Arguments.createMap();
-    params.putMap("region", this.serializeRegion(region));
-    this.sendEvent("onEnterRegion", params);
+  public void onEnterRegion(final IARegion region) {
+    Log.d(TAG, String.format("onEnterRegion %s", region.toString()));
+
+    fetchFloorPlan(region.getId(), new IAResultCallback<IAFloorPlan>() {
+      @Override
+      public void onResult(IAResult<IAFloorPlan> result) {
+        Log.d(TAG, String.format("onResult: %s", result.toString()));
+        WritableMap params = Arguments.createMap();
+        params.putMap("region", serializeRegion(region));
+
+        if (result.isSuccess()) {
+          params.putMap("floorplan", serializeFloorplan(result.getResult()));
+        } else {
+          params.putNull("floorplan");
+          Log.d(TAG, String.format("floorplan error: %s",
+                result.getError().toString()));
+        }
+        sendEvent("onEnterRegion", params);
+      }
+    });
   }
 
   @Override
   public void onExitRegion(IARegion region) {
-    Log.d("RNIA", String.format("onExitRegion %s", region.toString()));
+    Log.d(TAG, String.format("onExitRegion %s", region.toString()));
     WritableMap params = Arguments.createMap();
     params.putMap("region", this.serializeRegion(region));
     this.sendEvent("onExitRegion", params);
@@ -204,7 +234,7 @@ public class IndoorAtlasReactNativePlugin
   //IALocationListener methods
 	public void onLocationChanged(IALocation location) {
 		// handle location change
-    Log.d("RNIA", String.format("onLocationChanged %s", location.toString()));
+    Log.d(TAG, String.format("onLocationChanged %s", location.toString()));
     WritableMap params = Arguments.createMap();
     params.putMap("location", this.serializeLocation(location));
     this.sendEvent("onLocationChanged", params);
@@ -279,44 +309,51 @@ public class IndoorAtlasReactNativePlugin
     serialized.putInt("timestamp", new Long(region.getTimestamp()).intValue());
     serialized.putInt("type", region.getType());
 
+
     return serialized;
   }
 
-//private void fetchFloorPlan(String id) {
-//  // Cancel pending operation, if any
-//  if (mPendingAsyncResult != null && !mPendingAsyncResult.isCancelled()) {
-//    mPendingAsyncResult.cancel();
-//  }
+  private WritableMap serializeFloorplan(IAFloorPlan floorplan) {
+    WritableMap serialized = Arguments.createMap();
 
-//  mPendingAsyncResult = mResourceManager.fetchFloorPlanWithId(id);
-//  if (mPendingAsyncResult != null) {
-//    mPendingAsyncResult.setCallback(new IAResultCallback<IAFloorPlan>() {
-//      @Override
-//      public void onResult(IAResult<IAFloorPlan> result) {
-//        Logger.d(TAG, "onResult: %s", result);
+    serialized.putString("url", floorplan.getUrl());
+    serialized.putInt("bitmapWidth", floorplan.getBitmapWidth());
+    serialized.putInt("bitmapHeight", floorplan.getBitmapHeight());
+    serialized.putDouble("pixelsToMeters", (double) floorplan.getPixelsToMeters());
+    serialized.putDouble("metersToPixels", (double) floorplan.getMetersToPixels());
+    serialized.putDouble("floorLevel", floorplan.getFloorLevel());
+    serialized.putDouble("bearing", (double) floorplan.getBearing());
+    serialized.putDouble("widthMeters", (double) floorplan.getWidthMeters());
+    serialized.putDouble("heightMeters", (double) floorplan.getHeightMeters());
 
-//        if (result.isSuccess()) {
-//          handleFloorPlanChange(result.getResult());
-//        } else {
-//           do something with error
-//          Toast.makeText(FloorPlanManagerActivity.this,
-//            "loading floor plan failed: " + result.getError(), Toast.LENGTH_LONG)
-//            .show();
-//        }
-//      }
-//    }, Looper.getMainLooper());  deliver callbacks in main thread
-//  }
-//}
-  
-  //@ReactMethod
-  //public void createLocationManager(final Promise promise) {
-    //Handler mainHandler = new Handler(Looper.getMainLooper());
-    //mainHandler.post(new Runnable() {
-      //@Override
-      //public void run() {
-        //lmInstance = IALocationManager.create(appContext);
-        //promise.resolve(true);
-      //}
-    //});
-  //}
+    WritableArray pixelToWgs = Arguments.createArray();
+    float[] pixMatrix = new float[9];
+    floorplan.getAffineWgs2pix().getValues(pixMatrix);
+    for (float m : pixMatrix) {
+      pixelToWgs.pushDouble((double) m);
+    }
+    serialized.putArray("affinePix2Wgs", pixelToWgs);
+    
+    WritableArray wgsToPixel = Arguments.createArray();
+    float[] wgsMatrix = new float[9];
+    floorplan.getAffinePix2wgs().getValues(wgsMatrix);
+    for (float m : wgsMatrix) {
+      wgsToPixel.pushDouble((double) m);
+    }
+    serialized.putArray("affineWgs2Pix", wgsToPixel);
+
+    return serialized;
+  }
+
+  private void fetchFloorPlan(String id, IAResultCallback<IAFloorPlan> callback) {
+    // Cancel pending operation, if any
+    //if (mPendingAsyncResult != null && !mPendingAsyncResult.isCancelled()) {
+      //mPendingAsyncResult.cancel();
+    //}
+
+    IATask<IAFloorPlan> asyncTask = mResourceManager.fetchFloorPlanWithId(id);
+    if (asyncTask != null) {
+      asyncTask.setCallback(callback, Looper.getMainLooper()); //deliver callbacks in main thread
+    }
+  }
 }
