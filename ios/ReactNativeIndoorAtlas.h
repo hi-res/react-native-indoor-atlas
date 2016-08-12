@@ -2,7 +2,7 @@
 
 @import IndoorAtlas;
 
-@interface RNIA : NSObject <RCTBridgeModule, IALocationManagerDelegate>
+@interface ReactNativeIndoorAtlas : NSObject <RCTBridgeModule, IALocationManagerDelegate>
 
 @property(nonatomic) IAResourceManager* resourceManager;
 

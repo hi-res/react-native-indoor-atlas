@@ -1,8 +1,8 @@
 #import "ReactNativeIndoorAtlas.h"
 
-@implementation RNIA
+@implementation ReactNativeIndoorAtlas
 
-RCT_EXPORT_MODULE()
+RCT_EXPORT_MODULE("RNIA")
 
 - (instancetype)init
 {
