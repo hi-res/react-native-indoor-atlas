@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "keywords": "react-native",
   "main": "index.js",
+  "nativePackage": true,
   "peerDependencies": {
     "react-native": "*"
   },
