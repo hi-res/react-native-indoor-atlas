@@ -1,6 +1,6 @@
 #import "ReactNativeIndoorAtlas.h"
 
-@implementation ReactNativeIndoorAtlas
+@implementation RNIA
 
 RCT_EXPORT_MODULE()
 
@@ -23,7 +23,9 @@ RCT_REMAP_METHOD(getVersion,
 
 RCT_REMAP_METHOD(setApiKey,
                  setApiKey:(NSString*)apiKey
-                 andSecret:(NSString*)apiSecret)
+                 andSecret:(NSString*)apiSecret
+                 done:(RCTPromiseResolveBlock)resolve
+                 orReject:(RCTPromiseRejectBlock)reject)
 {
     IALocationManager *lm = [IALocationManager sharedInstance];
     [lm setDelegate:self];
@@ -32,6 +34,8 @@ RCT_REMAP_METHOD(setApiKey,
     [lm setApiKey:apiKey andSecret:apiSecret];
     
     [lm startUpdatingLocation];
+    resolve(nil);
+    
     
 //    [lm setDelegate:self];
     
