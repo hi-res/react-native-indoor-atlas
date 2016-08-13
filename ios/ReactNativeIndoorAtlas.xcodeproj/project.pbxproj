@@ -26,9 +26,6 @@
 		134814201AA4EA6300B7C361 /* libReactNativeIndoorAtlas.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libReactNativeIndoorAtlas.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		13BE3DEC1AC21097009241FE /* ReactNativeIndoorAtlas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReactNativeIndoorAtlas.h; sourceTree = "<group>"; };
 		13BE3DED1AC21097009241FE /* ReactNativeIndoorAtlas.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ReactNativeIndoorAtlas.m; sourceTree = "<group>"; };
-		26C9B7600AA4A5269E892038 /* Pods-ReactNativeIndoorAtlas.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactNativeIndoorAtlas.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ReactNativeIndoorAtlas/Pods-ReactNativeIndoorAtlas.debug.xcconfig"; sourceTree = "<group>"; };
-		4089A291C7BE288BBF0D3098 /* libPods-ReactNativeIndoorAtlas.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ReactNativeIndoorAtlas.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		66E507B5621EFD0542B3CD1D /* Pods-ReactNativeIndoorAtlas.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactNativeIndoorAtlas.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactNativeIndoorAtlas/Pods-ReactNativeIndoorAtlas.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,26 +53,7 @@
 				13BE3DEC1AC21097009241FE /* ReactNativeIndoorAtlas.h */,
 				13BE3DED1AC21097009241FE /* ReactNativeIndoorAtlas.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
-				A31D397D41C6AF86A7E6B101 /* Frameworks */,
-				BDD84CD662DC325230513CFC /* Pods */,
 			);
-			sourceTree = "<group>";
-		};
-		A31D397D41C6AF86A7E6B101 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				4089A291C7BE288BBF0D3098 /* libPods-ReactNativeIndoorAtlas.a */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		BDD84CD662DC325230513CFC /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				26C9B7600AA4A5269E892038 /* Pods-ReactNativeIndoorAtlas.debug.xcconfig */,
-				66E507B5621EFD0542B3CD1D /* Pods-ReactNativeIndoorAtlas.release.xcconfig */,
-			);
-			name = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,11 +63,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "ReactNativeIndoorAtlas" */;
 			buildPhases = (
-				E762CA21A9C1E409413F9B30 /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
-				C99D0D10AECFF43577963121 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -130,39 +106,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		C99D0D10AECFF43577963121 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ReactNativeIndoorAtlas/Pods-ReactNativeIndoorAtlas-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E762CA21A9C1E409413F9B30 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -268,11 +211,11 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 26C9B7600AA4A5269E892038 /* Pods-ReactNativeIndoorAtlas.debug.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Pods/IndoorAtlas/indooratlas-ios-sdk\"/**",
+					"$(SRCROOT)/../../../ios/Pods/IndoorAtlas/indooratlas-ios-sdk/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (
@@ -294,11 +237,11 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 66E507B5621EFD0542B3CD1D /* Pods-ReactNativeIndoorAtlas.release.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Pods/IndoorAtlas/indooratlas-ios-sdk\"/**",
+					"$(SRCROOT)/../../../ios/Pods/IndoorAtlas/indooratlas-ios-sdk/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (

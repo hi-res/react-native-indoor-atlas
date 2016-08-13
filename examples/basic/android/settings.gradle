@@ -1,0 +1,5 @@
+rootProject.name = 'basic'
+
+include ':app'
+include ':react-native-indoor-atlas'
+project(':react-native-indoor-atlas').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-indoor-atlas/android')

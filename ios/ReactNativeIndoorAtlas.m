@@ -2,13 +2,14 @@
 
 @implementation ReactNativeIndoorAtlas
 
-RCT_EXPORT_MODULE("RNIA")
+RCT_EXPORT_MODULE(RNIA)
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        [[IALocationManager sharedInstance] setDelegate:self];
+        self.locationManager = [IALocationManager new];
+        self.locationManager.delegate = self;
         self.resourceManager = [IAResourceManager resourceManagerWithLocationManager:[IALocationManager sharedInstance]];
     }
     return self;
@@ -27,30 +28,21 @@ RCT_REMAP_METHOD(setApiKey,
                  done:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
+    IALocationManager *lm = self.locationManager;
     [lm setDelegate:self];
     
-    
+    NSLog(@"Using API Key: %@", apiKey);
     [lm setApiKey:apiKey andSecret:apiSecret];
     
     [lm startUpdatingLocation];
     resolve(nil);
-    
-    
-//    [lm setDelegate:self];
-    
-    
-    // Set initial location
-//    IALocation *location = [IALocation locationWithFloorPlanId:@"f1ab7feb-ed18-4b66-b948-8d9893ba3270"];
-//    lm.location = location;
 }
 
 RCT_REMAP_METHOD(start,
                  start:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm startUpdatingLocation];
+    [self.locationManager startUpdatingLocation];
     resolve(nil);
 }
 
@@ -58,8 +50,7 @@ RCT_REMAP_METHOD(stop,
                  stop:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm stopUpdatingLocation];
+    [self.locationManager stopUpdatingLocation];
     resolve(nil);
 }
 
@@ -67,7 +58,7 @@ RCT_REMAP_METHOD(getLocation,
                  getLocation:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
+    IALocationManager *lm = self.locationManager;
     IALocation* loc = [lm location];
     
     NSMutableDictionary* retVal = [NSMutableDictionary dictionary];
@@ -88,34 +79,16 @@ RCT_REMAP_METHOD(getLocation,
     resolve(retVal);
 }
 
-RCT_REMAP_METHOD(setLocationById,
-                 setLocationById:(NSString*)locationId)
-{
-    IALocation *location = [IALocation locationWithFloorPlanId:locationId];
-    [[IALocationManager sharedInstance] setLocation:location];
-}
-
-RCT_REMAP_METHOD(setLocation,
-                 setLocationWithLat:(NSNumber*)lat
-                 andLng:(NSNumber*)lng
-                 resolve:(RCTPromiseResolveBlock)resolve
-                 orReject:(RCTPromiseRejectBlock)reject)
-{
-    IALocationManager* lm = [IALocationManager sharedInstance];
-    IALocation* loc = [lm location];
-    resolve(nil);
-}
-
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
            didUpdateLocations:(nonnull NSArray*)locations
 {
     NSLog(@"didUpdateLocations: %@", locations);
     (void) manager;
     
-    CLLocation *l = [(IALocation*)locations.lastObject location];
+    IALocation *l = (IALocation*)locations.lastObject;
     
     // The accuracy of coordinate position depends on the placement of floor plan image.
-    NSLog(@"position changed to coordinate: %f,%f", l.coordinate.latitude, l.coordinate.longitude);
+    NSLog(@"position changed to coordinate: %.6f,%.6f", l.location.coordinate.latitude, l.location.coordinate.longitude);
 }
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
