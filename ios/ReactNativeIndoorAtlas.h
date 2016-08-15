@@ -22,6 +22,9 @@
 - (void)getLocation:(RCTPromiseResolveBlock)resolve
            orReject:(RCTPromiseRejectBlock)reject;
 
+- (NSMutableDictionary*)serializeLocation:(IALocation*)location;
+- (NSMutableDictionary*)serializeRegion:(IARegion*)region;
+
 #pragma mark IALocationManagerDelegate Methods
 
 /**
