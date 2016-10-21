@@ -1,8 +1,9 @@
 {
   "name": "react-native-indoor-atlas",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "keywords": "react-native",
   "main": "index.js",
+  "nativePackage": true,
   "peerDependencies": {
     "react-native": "*"
   },

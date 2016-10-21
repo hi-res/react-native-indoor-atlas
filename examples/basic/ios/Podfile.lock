@@ -1,0 +1,12 @@
+PODS:
+  - IndoorAtlas (2.1.3)
+
+DEPENDENCIES:
+  - IndoorAtlas
+
+SPEC CHECKSUMS:
+  IndoorAtlas: 6afde0205af4e7302c96a23a40069573b44abf89
+
+PODFILE CHECKSUM: 784b22f22a66c46ab52ffcb814f85934e7ef59ba
+
+COCOAPODS: 1.0.1

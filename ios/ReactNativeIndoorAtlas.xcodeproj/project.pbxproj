@@ -53,15 +53,7 @@
 				13BE3DEC1AC21097009241FE /* ReactNativeIndoorAtlas.h */,
 				13BE3DED1AC21097009241FE /* ReactNativeIndoorAtlas.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
-				A31D397D41C6AF86A7E6B101 /* Frameworks */,
 			);
-			sourceTree = "<group>";
-		};
-		A31D397D41C6AF86A7E6B101 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -222,14 +214,14 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/IndoorAtlas/indooratlas-ios-sdk\"/**",
-					"/Users/srounce/sketches/indooratlastest/ios/Pods/**",
+					"\"$(SRCROOT)/Pods/IndoorAtlas/indooratlas-ios-sdk\"/**",
+					"$(SRCROOT)/../../../ios/Pods/IndoorAtlas/indooratlas-ios-sdk/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/../../node_modules/react-native/React/**",
-					"$(SRCROOT)/../../React/**",
+					"$(inherited)/**",
+					"$(PROJECT_DIR)/../node_modules/react-native/React/**",
+					"$(PROJECT_DIR)/../../react-native/React/**",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
@@ -248,14 +240,15 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"${PODS_ROOT}/IndoorAtlas/indooratlas-ios-sdk\"/**",
-					"/Users/srounce/sketches/indooratlastest/ios/Pods/**",
+					"\"$(SRCROOT)/Pods/IndoorAtlas/indooratlas-ios-sdk\"/**",
+					"$(SRCROOT)/../../../ios/Pods/IndoorAtlas/indooratlas-ios-sdk/**",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
+					"$(inherited)/**",
+					"$(PROJECT_DIR)/../node_modules/react-native/React/**",
+					"$(PROJECT_DIR)/../../react-native/React/**",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../../React/**",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_CFLAGS = (

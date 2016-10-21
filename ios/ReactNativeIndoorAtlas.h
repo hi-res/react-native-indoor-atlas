@@ -2,8 +2,9 @@
 
 @import IndoorAtlas;
 
-@interface ReactNativeIndoorAtlas : NSObject () <RCTBridgeModule, IALocationManagerDelegate>
+@interface ReactNativeIndoorAtlas : NSObject <RCTBridgeModule, IALocationManagerDelegate>
 
+@property(nonatomic) IALocationManager* locationManager;
 @property(nonatomic) IAResourceManager* resourceManager;
 
 - (void)getVersion:(RCTPromiseResolveBlock)resolve
@@ -21,13 +22,8 @@
 - (void)getLocation:(RCTPromiseResolveBlock)resolve
            orReject:(RCTPromiseRejectBlock)reject;
 
-- (void)setLocationById:(NSNumber*)locationId;
-
-- (void)setLocationWithLat:(NSNumber*)lat
-                    andLng:(NSNumber*)lng
-                   resolve:(RCTPromiseResolveBlock)resolve
-                  orReject:(RCTPromiseRejectBlock)reject;
-
+- (NSMutableDictionary*)serializeLocation:(IALocation*)location;
+- (NSMutableDictionary*)serializeRegion:(IARegion*)region;
 
 #pragma mark IALocationManagerDelegate Methods
 

@@ -1,0 +1,2 @@
+export const API_KEY = '8165cb60-ebef-4982-b27c-c8587568bfd6';
+export const API_SECRET = 'kOML(oK(OPlTemHoQqzIySNvOUqANznQWyA2JFu1RLrX8oodBeLPt0pw1zZL2F92Xl2xtwgz4RhDGYGUVWHp)Un%qX1X%LGYVl2pVChsqvCV7mYK5Iu2EndXZrW0bOIO';

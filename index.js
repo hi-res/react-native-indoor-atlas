@@ -11,7 +11,8 @@ const NativeModules = require('react-native').NativeModules,
 
 
 var ReactNativeIndoorAtlas = {
-  IALocationManager: require('./lib/IALocationManager.js'),
+  IALocationManager: require('./lib/IALocationManager'),
+  IALocationManagerEvents: require('./lib/IALocationManagerEvents'),
   getVersion: function() {
     return IANative.getVersion()
   }

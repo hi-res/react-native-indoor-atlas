@@ -1,15 +1,21 @@
 #import "ReactNativeIndoorAtlas.h"
 
+#import "RCTEventDispatcher.h"
+
 @implementation ReactNativeIndoorAtlas
 
-RCT_EXPORT_MODULE()
+@synthesize bridge = _bridge;
+
+RCT_EXPORT_MODULE(RNIA)
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        [[IALocationManager sharedInstance] setDelegate:self];
-        self.resourceManager = [IAResourceManager resourceManagerWithLocationManager:[IALocationManager sharedInstance]];
+        IALocationManager *lm = [IALocationManager new];
+        lm.delegate = self;
+        self.locationManager = lm;
+        self.resourceManager = [IAResourceManager resourceManagerWithLocationManager:lm];
     }
     return self;
 }
@@ -23,30 +29,25 @@ RCT_REMAP_METHOD(getVersion,
 
 RCT_REMAP_METHOD(setApiKey,
                  setApiKey:(NSString*)apiKey
-                 andSecret:(NSString*)apiSecret)
+                 andSecret:(NSString*)apiSecret
+                 done:(RCTPromiseResolveBlock)resolve
+                 orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm setDelegate:self];
-    
-    
+    IALocationManager *lm = self.locationManager;
+    //    [lm setDelegate:self];
+    [lm stopUpdatingLocation];
+    NSLog(@"Using API Key: %@", apiKey);
     [lm setApiKey:apiKey andSecret:apiSecret];
     
     [lm startUpdatingLocation];
-    
-//    [lm setDelegate:self];
-    
-    
-    // Set initial location
-//    IALocation *location = [IALocation locationWithFloorPlanId:@"f1ab7feb-ed18-4b66-b948-8d9893ba3270"];
-//    lm.location = location;
+    resolve(nil);
 }
 
 RCT_REMAP_METHOD(start,
                  start:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm startUpdatingLocation];
+    [self.locationManager startUpdatingLocation];
     resolve(nil);
 }
 
@@ -54,8 +55,7 @@ RCT_REMAP_METHOD(stop,
                  stop:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
-    [lm stopUpdatingLocation];
+    [self.locationManager stopUpdatingLocation];
     resolve(nil);
 }
 
@@ -63,73 +63,82 @@ RCT_REMAP_METHOD(getLocation,
                  getLocation:(RCTPromiseResolveBlock)resolve
                  orReject:(RCTPromiseRejectBlock)reject)
 {
-    IALocationManager *lm = [IALocationManager sharedInstance];
+    IALocationManager *lm = self.locationManager;
     IALocation* loc = [lm location];
     
+    resolve([self serializeLocation:loc]);
+}
+
+- (NSMutableDictionary *)serializeLocation:(IALocation *)location
+{
     NSMutableDictionary* retVal = [NSMutableDictionary dictionary];
-    [retVal setValue:[NSNumber numberWithDouble:loc.location.altitude] forKey:@"altitude"];
+    [retVal setValue:[NSNumber numberWithDouble:location.location.altitude] forKey:@"altitude"];
     [retVal setValue:[NSDictionary dictionaryWithObjectsAndKeys:
-                      [NSNumber numberWithDouble:loc.location.coordinate.latitude], @"latitude",
-                      [NSNumber numberWithDouble:loc.location.coordinate.longitude], @"longitude",
+                      [NSNumber numberWithDouble:location.location.coordinate.latitude], @"latitude",
+                      [NSNumber numberWithDouble:location.location.coordinate.longitude], @"longitude",
                       nil]
               forKey:@"coordinates"];
-    [retVal setValue:[NSNumber numberWithInteger:loc.floor.level] forKey:@"floorLevel"];
+    [retVal setValue:[NSNumber numberWithInteger:location.floor.level] forKey:@"floorLevel"];
     
-    NSMutableDictionary* region = [NSMutableDictionary dictionary];
-    [region setValue:loc.region.identifier forKey:@"id"];
-    [region setValue:[NSNumber numberWithInt:loc.region.type] forKey:@"type"];
-    [region setValue:[NSNumber numberWithDouble:[loc.region.timestamp timeIntervalSince1970]] forKey:@"timestamp"];
-    [retVal setValue:region forKey:@"region"];
-    
-    resolve(retVal);
+    [retVal setValue:[self serializeRegion:location.region] forKey:@"region"];
+    return retVal;
 }
 
-RCT_REMAP_METHOD(setLocationById,
-                 setLocationById:(NSString*)locationId)
+- (NSMutableDictionary *)serializeRegion:(IARegion *)region
 {
-    IALocation *location = [IALocation locationWithFloorPlanId:locationId];
-    [[IALocationManager sharedInstance] setLocation:location];
+    
+    NSMutableDictionary* retVal = [NSMutableDictionary dictionary];
+    [retVal setValue:region.identifier forKey:@"id"];
+    [retVal setValue:[NSNumber numberWithInt:region.type] forKey:@"type"];
+    [retVal setValue:[NSNumber numberWithDouble:[region.timestamp timeIntervalSince1970]] forKey:@"timestamp"];
+    
+    return retVal;
+    
 }
 
-RCT_REMAP_METHOD(setLocation,
-                 setLocationWithLat:(NSNumber*)lat
-                 andLng:(NSNumber*)lng
-                 resolve:(RCTPromiseResolveBlock)resolve
-                 orReject:(RCTPromiseRejectBlock)reject)
-{
-    IALocationManager* lm = [IALocationManager sharedInstance];
-    IALocation* loc = [lm location];
-    resolve(nil);
-}
+#pragma mark IALocationManagerDelegate Methods
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
            didUpdateLocations:(nonnull NSArray*)locations
 {
-    NSLog(@"didUpdateLocations: %@", locations);
+    NSLog(@"onLocationChanged: %@", locations);
     (void) manager;
     
-    CLLocation *l = [(IALocation*)locations.lastObject location];
+    IALocation *l = (IALocation*)locations.lastObject;
     
     // The accuracy of coordinate position depends on the placement of floor plan image.
-    NSLog(@"position changed to coordinate: %f,%f", l.coordinate.latitude, l.coordinate.longitude);
+    NSLog(@"position changed to coordinate: %.6f,%.6f", l.location.coordinate.latitude, l.location.coordinate.longitude);
+    
+    
+    [self.bridge.eventDispatcher sendAppEventWithName:@"RNIA.onLocationChanged"
+                                                 body:@{@"status": status}];
 }
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
                didEnterRegion:(nonnull IARegion*)region
 {
-    NSLog(@"didEnterRegion: %@", region);
+    NSLog(@"onEnterRegion: %@", region);
+    
+    [self.bridge.eventDispatcher sendAppEventWithName:@"RNIA.onEnterRegion"
+                                                 body:@{@"status": status}];
 }
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
                 didExitRegion:(nonnull IARegion*)region
 {
-    NSLog(@"didExitRegion: %@", region);
+    NSLog(@"onExitRegion: %@", region);
+    
+    [self.bridge.eventDispatcher sendAppEventWithName:@"RNIA.onExitRegion"
+                                                 body:@{@"status": status}];
 }
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
                 statusChanged:(nonnull IAStatus*)status
 {
     NSLog(@"statusChanged: %@", status);
+    
+    [self.bridge.eventDispatcher sendAppEventWithName:@"RNIA.onStatusChanged"
+                                                 body:@{@"status": status}];
 }
 
 - (void)indoorLocationManager:(nonnull IALocationManager*)manager
@@ -138,18 +147,23 @@ RCT_REMAP_METHOD(setLocation,
     NSString* sQuality;
     
     switch (quality) {
-        case kIACalibrationGood:
-            sQuality = @"kIACalibrationGood";
-            break;
         case kIACalibrationPoor:
-            sQuality = @"kIACalibrationPoor";
+            sQuality = @"POOR";
+            break;
+        case kIACalibrationGood:
+            sQuality = @"GOOD";
             break;
         case kIACalibrationExcellent:
-            sQuality = @"kIACalibrationExcellent";
+            sQuality = @"EXCELLENT";
             break;
         default:
+            sQuality = @"UNKNOWN";
             break;
     }
+    
+    [self.bridge.eventDispatcher sendAppEventWithName:@"RNIA.onCalibrationChanged"
+                                                 body:@{@"quality": sQuality}];
+    
     NSLog(@"calibrationQualityChanged: %@", sQuality);
 }
 

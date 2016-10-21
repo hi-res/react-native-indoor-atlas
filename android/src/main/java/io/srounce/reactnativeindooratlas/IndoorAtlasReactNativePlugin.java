@@ -247,16 +247,16 @@ public class IndoorAtlasReactNativePlugin
 
     switch (status) {
 			case IALocationManager.STATUS_CALIBRATION_CHANGED:
-				String quality = "unknown";
+				String quality = "UNKNOWN";
 				switch (extras.getInt("quality")) {
 					case IALocationManager.CALIBRATION_POOR:
-						quality = "Poor";
+						quality = "POOR";
 						break;
 					case IALocationManager.CALIBRATION_GOOD:
-						quality = "Good";
+						quality = "GOOD";
 						break;
 					case IALocationManager.CALIBRATION_EXCELLENT:
-						quality = "Excellent";
+						quality = "EXCELLENT";
 						break;
 				}
 				Log.d(TAG, String.format("Calibration change. Quality: %s", quality));
